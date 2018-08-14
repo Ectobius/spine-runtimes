@@ -29,6 +29,7 @@
  *****************************************************************************/
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Spine {
 	public static class MathUtils {
@@ -53,29 +54,34 @@ namespace Spine {
 				sin[(int)(i * DegToIndex) & SIN_MASK] = (float)Math.Sin(i * DegRad);
 		}
 
-		/// <summary>Returns the sine in radians from a lookup table.</summary>
-		static public float Sin (float radians) {
+        /// <summary>Returns the sine in radians from a lookup table.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public float Sin (float radians) {
 			return sin[(int)(radians * RadToIndex) & SIN_MASK];
 		}
 
-		/// <summary>Returns the cosine in radians from a lookup table.</summary>
-		static public float Cos (float radians) {
+        /// <summary>Returns the cosine in radians from a lookup table.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public float Cos (float radians) {
 			return sin[(int)((radians + PI / 2) * RadToIndex) & SIN_MASK];
 		}
-			
-		/// <summary>Returns the sine in radians from a lookup table.</summary>
-		static public float SinDeg (float degrees) {
+
+        /// <summary>Returns the sine in radians from a lookup table.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public float SinDeg (float degrees) {
 			return sin[(int)(degrees * DegToIndex) & SIN_MASK];
 		}
-			
-		/// <summary>Returns the cosine in radians from a lookup table.</summary>
-		static public float CosDeg (float degrees) {
+
+        /// <summary>Returns the cosine in radians from a lookup table.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public float CosDeg (float degrees) {
 			return sin[(int)((degrees + 90) * DegToIndex) & SIN_MASK];
 		}
 
-		/// <summary>Returns atan2 in radians, faster but less accurate than Math.Atan2. Average error of 0.00231 radians (0.1323
-		/// degrees), largest error of 0.00488 radians (0.2796 degrees).</summary>
-		static public float Atan2 (float y, float x) {
+        /// <summary>Returns atan2 in radians, faster but less accurate than Math.Atan2. Average error of 0.00231 radians (0.1323
+        /// degrees), largest error of 0.00488 radians (0.2796 degrees).</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public float Atan2 (float y, float x) {
 			if (x == 0f) {
 				if (y > 0f) return PI / 2;
 				if (y == 0f) return 0f;

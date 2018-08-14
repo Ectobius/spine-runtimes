@@ -64,8 +64,64 @@ namespace Spine {
 				timelines.Items[i].Apply(skeleton, lastTime, time, events, alpha, pose, direction);
 		}
 
-		/// <param name="target">After the first and before the last entry.</param>
-		internal static int BinarySearch (float[] values, float target, int step) {
+	    internal static int Search(float[] values, float target, int step)
+	    {
+	        if (values.Length / step <= 2)
+	        {
+	            return step;
+	        }
+
+	        if (values.Length / step <= 4)
+	        {
+	            for (int i = 0; i < values.Length; i += step)
+	                if (values[i] > target) return i;
+	            return -1;
+	        }
+
+	        int low = 0;
+	        int high = values.Length / step - 2;
+	        int current = high / 2;
+	        while (true)
+	        {
+	            if (values[(current + 1) * step] <= target)
+	                low = current + 1;
+	            else
+	                high = current;
+	            if (low == high) return (low + 1) * step;
+	            current = (low + high) / 2;
+	        }
+	    }
+
+	    internal static int Search(float[] values, float target)
+	    {
+	        if (values.Length <= 2)
+	        {
+	            return 1;
+	        }
+
+	        if (values.Length <= 4)
+	        {
+	            for (int i = 0; i < values.Length; i++)
+	                if (values[i] > target) return i;
+	            return -1;
+	        }
+
+	        int low = 0;
+	        int high = values.Length - 2;
+	        int current = (int)((uint)high >> 1);
+	        while (true)
+	        {
+	            if (values[(current + 1)] <= target)
+	                low = current + 1;
+	            else
+	                high = current;
+	            if (low == high) return (low + 1);
+	            current = (int)((uint)(low + high) >> 1);
+	        }
+	    }
+
+        /// <param name="target">After the first and before the last entry.</param>
+        internal static int BinarySearch (float[] values, float target, int step) {
 			int low = 0;
 			int high = values.Length / step - 2;
 			if (high == 0) return step;
@@ -201,7 +257,6 @@ namespace Spine {
 		}
 
 		public float GetCurvePercent (int frameIndex, float percent) {
-			percent = MathUtils.Clamp (percent, 0, 1);
 			float[] curves = this.curves;
 			int i = frameIndex * BEZIER_SIZE;
 			float type = curves[i];
@@ -288,7 +343,7 @@ namespace Spine {
 			}
 
 			// Interpolate between the previous frame and the current frame.
-			int frame = Animation.BinarySearch(frames, time, ENTRIES);
+			int frame = Animation.Search(frames, time, ENTRIES);
 			float prevRotation = frames[frame + PREV_ROTATION];
 			float frameTime = frames[frame];
 			float percent = GetCurvePercent((frame >> 1) - 1, 1 - (time - frameTime) / (frames[frame + PREV_TIME] - frameTime));
@@ -359,7 +414,7 @@ namespace Spine {
 				y = frames[frames.Length + PREV_Y];
 			} else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				x = frames[frame + PREV_X];
 				y = frames[frame + PREV_Y];
 				float frameTime = frames[frame];
@@ -412,7 +467,7 @@ namespace Spine {
 				y = frames[frames.Length + PREV_Y] * bone.data.scaleY;
 			} else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				x = frames[frame + PREV_X];
 				y = frames[frame + PREV_Y];
 				float frameTime = frames[frame];
@@ -480,7 +535,7 @@ namespace Spine {
 				y = frames[frames.Length + PREV_Y];
 			} else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				x = frames[frame + PREV_X];
 				y = frames[frame + PREV_Y];
 				float frameTime = frames[frame];
@@ -561,7 +616,7 @@ namespace Spine {
 				a = frames[i + PREV_A];
 			} else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				r = frames[frame + PREV_R];
 				g = frames[frame + PREV_G];
 				b = frames[frame + PREV_B];
@@ -685,7 +740,7 @@ namespace Spine {
 				b2 = frames[i + PREV_B2];
 			} else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				r = frames[frame + PREV_R];
 				g = frames[frame + PREV_G];
 				b = frames[frame + PREV_B];
@@ -791,7 +846,7 @@ namespace Spine {
 			if (time >= frames[frames.Length - 1]) // Time is after last frame.
 				frameIndex = frames.Length - 1;
 			else
-				frameIndex = Animation.BinarySearch(frames, time, 1) - 1;
+				frameIndex = Animation.Search(frames, time, 1) - 1;
 
 			attachmentName = attachmentNames[frameIndex];
 			slot.Attachment = attachmentName == null ? null : skeleton.GetAttachment(slotIndex, attachmentName);
@@ -905,7 +960,7 @@ namespace Spine {
 			}
 
 			// Interpolate between the previous frame and the current frame.
-			int frame = Animation.BinarySearch(frames, time);
+			int frame = Animation.Search(frames, time);
 			float[] prevVertices = frameVertices[frame - 1];
 			float[] nextVertices = frameVertices[frame];
 			float frameTime = frames[frame];
@@ -982,7 +1037,7 @@ namespace Spine {
 			if (lastTime < frames[0])
 				frame = 0;
 			else {
-				frame = Animation.BinarySearch(frames, lastTime);
+				frame = Animation.Search(frames, lastTime);
 				float frameTime = frames[frame];
 				while (frame > 0) { // Fire multiple events with the same frame.
 					if (frames[frame - 1] != frameTime) break;
@@ -1036,7 +1091,7 @@ namespace Spine {
 			if (time >= frames[frames.Length - 1]) // Time is after last frame.
 				frame = frames.Length - 1;
 			else
-				frame = Animation.BinarySearch(frames, time) - 1;
+				frame = Animation.Search(frames, time) - 1;
 			
 			int[] drawOrderToSetupIndex = drawOrders[frame];
 			if (drawOrderToSetupIndex == null) {
@@ -1110,7 +1165,7 @@ namespace Spine {
 			}
 
 			// Interpolate between the previous frame and the current frame.
-			int frame = Animation.BinarySearch(frames, time, ENTRIES);
+			int frame = Animation.Search(frames, time, ENTRIES);
 			float mix = frames[frame + PREV_MIX];
 			float frameTime = frames[frame];
 			float percent = GetCurvePercent(frame / ENTRIES - 1, 1 - (time - frameTime) / (frames[frame + PREV_TIME] - frameTime));
@@ -1185,7 +1240,7 @@ namespace Spine {
 				shear = frames[i + PREV_SHEAR];
 			} else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				rotate = frames[frame + PREV_ROTATE];
 				translate = frames[frame + PREV_TRANSLATE];
 				scale = frames[frame + PREV_SCALE];
@@ -1261,7 +1316,7 @@ namespace Spine {
 				position = frames[frames.Length + PREV_VALUE];
 			else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				position = frames[frame + PREV_VALUE];
 				float frameTime = frames[frame];
 				float percent = GetCurvePercent(frame / ENTRIES - 1,
@@ -1305,7 +1360,7 @@ namespace Spine {
 				spacing = frames[frames.Length + PREV_VALUE];
 			else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				spacing = frames[frame + PREV_VALUE];
 				float frameTime = frames[frame];
 				float percent = GetCurvePercent(frame / ENTRIES - 1,
@@ -1372,7 +1427,7 @@ namespace Spine {
 				translate = frames[frames.Length + PREV_TRANSLATE];
 			} else {
 				// Interpolate between the previous frame and the current frame.
-				int frame = Animation.BinarySearch(frames, time, ENTRIES);
+				int frame = Animation.Search(frames, time, ENTRIES);
 				rotate = frames[frame + PREV_ROTATE];
 				translate = frames[frame + PREV_TRANSLATE];
 				float frameTime = frames[frame];
