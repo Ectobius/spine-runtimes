@@ -37,6 +37,8 @@ namespace Spine.Unity {
 	[HelpURL("http://esotericsoftware.com/spine-unity-documentation#Controlling-Animation")]
 	public class SkeletonAnimation : SkeletonRenderer, ISkeletonAnimation, IAnimationStateComponent {
 
+		private float _timeSinceUpdate = 0.0f;
+
 		#region IAnimationStateComponent
 		/// <summary>
 		/// This is the Spine.AnimationState object of this SkeletonAnimation. You can control animations through it. 
@@ -177,7 +179,12 @@ namespace Spine.Unity {
 		}
 
 		void Update () {
-			Update(Time.deltaTime);
+			_timeSinceUpdate += Time.deltaTime;
+		    if (shouldSkipFrame) return;
+
+			Update(_timeSinceUpdate);
+
+			_timeSinceUpdate = 0.0f;
 		}
 
 		/// <summary>Progresses the AnimationState according to the given deltaTime, and applies it to the Skeleton. Use Time.deltaTime to update manually. Use deltaTime 0 to update without progressing the time.</summary>

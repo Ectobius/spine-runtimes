@@ -40,6 +40,9 @@ namespace Spine.Unity {
 	[HelpURL("http://esotericsoftware.com/spine-unity-documentation#Rendering")]
 	public class SkeletonRenderer : MonoBehaviour, ISkeletonComponent, IHasSkeletonDataAsset {
 
+		[HideInInspector]
+	    public bool shouldSkipFrame;
+
 		public delegate void SkeletonRendererDelegate (SkeletonRenderer skeletonRenderer);
 		public event SkeletonRendererDelegate OnRebuild;
 
@@ -227,6 +230,8 @@ namespace Spine.Unity {
 		/// <summary>
 		/// Generates a new UnityEngine.Mesh from the internal Skeleton.</summary>
 		public virtual void LateUpdate () {
+			if (shouldSkipFrame) return;
+
 			if (!valid) return;
 
 			#if SPINE_OPTIONAL_RENDEROVERRIDE
